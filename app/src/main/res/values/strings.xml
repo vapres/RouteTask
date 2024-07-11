@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">RouteTask</string>
+    <string name="sneakers">sneakers</string>
+    <string name="review_star">Review Star</string>
+    <string name="add_to_favourite">Add to favourite</string>
+    <string name="add_to_cart">Add to cart</string>
+    <string name="product_title">Nike Air Jordon\nNike shoes flexible for wo..</string>
+</resources>
