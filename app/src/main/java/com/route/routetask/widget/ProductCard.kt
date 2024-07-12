@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.route.routetask.ui.theme.Poppins
@@ -31,10 +30,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
-import com.route.routetask.Product
+import androidx.compose.ui.text.style.TextOverflow
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.route.routetask.R
+import com.route.routetask.model.Product
+import kotlin.math.round
 
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ProductCard(product: Product) {
     Card(
@@ -43,11 +47,11 @@ fun ProductCard(product: Product) {
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 8.dp)
             .fillMaxWidth(.5f)
-            .height(238.dp)
+            .height(240.dp)
     ) {
         Box(modifier = Modifier.fillMaxHeight(.5f)) {
-            Image(
-                painter = painterResource(id = product.drawableResId),
+            GlideImage(
+                model = product.thumbnail,
                 contentDescription = stringResource(R.string.sneakers),
                 contentScale = ContentScale.Crop
             )
@@ -65,17 +69,30 @@ fun ProductCard(product: Product) {
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
-                text = stringResource(product.titleResId),
-                lineHeight = 18.sp,
+                text = product.title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 color = textColor,
                 fontFamily = Poppins,
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp
             )
 
+            Text(
+                text = product.description,
+                lineHeight = 18.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = textColor,
+                fontFamily = Poppins,
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp
+            )
+
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "EGP ${product.priceAfterDiscount}",
+                    text = "EGP ${round((product.price - (product.price * product.discountPercentage / 100))*100.0)/100.0}",
                     color = textColor,
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Normal,
@@ -83,7 +100,7 @@ fun ProductCard(product: Product) {
                 )
                 Spacer(Modifier.width(16.dp))
                 Text(
-                    text = product.originalPrice,
+                    text = "${product.price}",
                     style = TextStyle(
                         textDecoration = TextDecoration.LineThrough,
                         color = discountTextColor,
@@ -96,7 +113,7 @@ fun ProductCard(product: Product) {
 
             Row {
                 Text(
-                    text = "Review (${product.reviewRate})",
+                    text = "Review (${product.rating})",
                     color = textColor,
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Normal,
@@ -120,19 +137,4 @@ fun ProductCard(product: Product) {
 
     }
 
-}
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ShowProductCard() {
-    ProductCard(
-        Product(
-            R.string.product_title,
-            R.drawable.sneakers,
-            4.3,
-            "2000",
-            "1200"
-        )
-    )
 }
