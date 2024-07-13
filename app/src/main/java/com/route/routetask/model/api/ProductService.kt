@@ -8,6 +8,11 @@ import retrofit2.http.Query
 interface ProductService {
     @GET("products")
 
-    fun getProducts(): Call<ProductResponse>
+    fun getAllProducts(): Call<ProductResponse>
+
+    @GET("products/search")
+    fun getSearchedProduct(
+        @Query("q") search: String
+    ): Call<ProductResponse>
 
 }
