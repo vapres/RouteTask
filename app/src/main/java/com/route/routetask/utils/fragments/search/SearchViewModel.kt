@@ -6,9 +6,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.route.routetask.model.Product
 import com.route.routetask.model.ProductResponse
 import com.route.routetask.model.api.ApiManager
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -17,32 +19,25 @@ class SearchViewModel : ViewModel() {
     var searchQuery by mutableStateOf("")
     var searchedProductsList by mutableStateOf(listOf<Product>())
 
-    private var getSearchedProductCall: Call<ProductResponse>? = null
+    private var searchedProductResponse: ProductResponse? = null
 
     fun getProductBySearch() {
 
-        getSearchedProductCall =
-            ApiManager
-                .getProductsService()
-                .getSearchedProduct(search = searchQuery)
-
-        getSearchedProductCall?.enqueue(object : Callback<ProductResponse> {
-            override fun onResponse(
-                call: Call<ProductResponse>,
-                response: Response<ProductResponse>
-            ) {
-                if (response.isSuccessful) {
-                    val searchedProducts = response.body()?.products
-                    if (!searchedProducts.isNullOrEmpty())
-                        searchedProductsList = searchedProducts
+        viewModelScope.launch {
+            try {
+                searchedProductResponse =
+                    ApiManager
+                        .getProductsService()
+                        .getSearchedProduct(search = searchQuery)
+                if (!searchedProductResponse?.products.isNullOrEmpty()) {
+                    searchedProductsList = searchedProductResponse!!.products
                 }
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Failed to fetch data: ${e.message}")
+
             }
 
-            override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
-                Log.e(ContentValues.TAG, "Searched product not found ${t.message}")
-            }
-
-        })
+        }
     }
 
 }

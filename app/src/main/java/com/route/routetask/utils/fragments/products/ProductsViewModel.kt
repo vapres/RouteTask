@@ -7,9 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.route.routetask.model.Product
 import com.route.routetask.model.ProductResponse
 import com.route.routetask.model.api.ApiManager
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -17,30 +19,24 @@ import retrofit2.Response
 class ProductsViewModel : ViewModel() {
     var productsList by mutableStateOf(listOf<Product>())
     var focusRequester = FocusRequester()
-    private var getProductsCall: Call<ProductResponse>? = null
+    private var productResponse: ProductResponse? = null
 
     fun getProducts() {
 
-        getProductsCall = ApiManager
-            .getProductsService()
-            .getAllProducts()
+        viewModelScope.launch {
+            try {
+                productResponse = ApiManager
+                    .getProductsService()
+                    .getAllProducts()
 
-        getProductsCall?.enqueue(object : Callback<ProductResponse> {
-            override fun onResponse(
-                call: Call<ProductResponse>,
-                response: Response<ProductResponse>
-            ) {
-                if (response.isSuccessful) {
-                    val products = response.body()?.products
-                    if (!products.isNullOrEmpty())
-                        productsList = products
+                if (!productResponse?.products.isNullOrEmpty()) {
+                    productsList = productResponse!!.products
                 }
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Failed to fetch data: ${e.message}")
             }
 
-            override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
-                Log.e(ContentValues.TAG, "Failed to fetch data: ${t.message}")
-            }
 
-        })
+        }
     }
 }
